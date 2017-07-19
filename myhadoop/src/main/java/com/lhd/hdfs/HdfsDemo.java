@@ -24,6 +24,9 @@ public class HdfsDemo {
 	
 	@Before
 	public void begin() throws Exception{
+		//主动设置运行hadoop的用户,当机器名无法改变为root时
+		//System.setProperty("HADOOP_USER_NAME", "root");
+		
 		//加载src目录下的配置文件
     	config = new Configuration();
     	fileSystem =  FileSystem.get(config);
