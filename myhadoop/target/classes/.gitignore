@@ -3,3 +3,6 @@
 /core-site.xml
 /hdfs-site.xml
 /tq/
+/friend/
+/log4j.properties
+/org/
