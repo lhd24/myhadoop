@@ -6,3 +6,5 @@
 /friend/
 /log4j.properties
 /org/
+/core-site1.xml
+/hdfs-site1.xml
