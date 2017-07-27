@@ -1,40 +1,39 @@
-package com.lhd.mr.tq;
+package com.lhd.mr.tfidf;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class WeatherJob {
-	public static void main(String[] args){
+public class DfJob {
+
+	public static void main(String[] args) {
 		Configuration config = new Configuration();
 		
 		try {
 			Job job = Job.getInstance(config);
-			job.setJarByClass(WeatherJob.class);
+			job.setJarByClass(DfJob.class);
 			
-			job.setJobName("weather");
+			job.setJobName("DfJob");
 			
-			job.setMapperClass(WeatherMapper.class);
-			job.setMapOutputKeyClass(Weather.class);
-			job.setMapOutputValueClass(DoubleWritable.class);
+			job.setMapperClass(DfMapper.class);
+			job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputValueClass(IntWritable.class);
 			
-			job.setReducerClass(WeatherReducer.class);
+			job.setReducerClass(DfReducer.class);
+			job.setInputFormatClass(KeyValueTextInputFormat.class);
 			
-			//设置分区，排序，分组
-			job.setPartitionerClass(WeatherPartition.class);
-			job.setSortComparatorClass(WeatherSort.class);
-			job.setGroupingComparatorClass(WeatherGroup.class);
+			//设置combiner
+			job.setCombinerClass(DfReducer.class);
 			
-			job.setNumReduceTasks(3);
+			FileInputFormat.addInputPath(job, new Path("/usr/tfidf/output"));
 			
-			FileInputFormat.addInputPath(job, new Path("/usr/tq/"));
-			
-			Path outpath = new Path("/usr/tq/output");
+			Path outpath = new Path("/usr/tfidf/dfoutput");
 			FileSystem fs = FileSystem.get(config);
 			if (fs.exists(outpath)) {
 				fs.delete(outpath, true);
@@ -47,8 +46,9 @@ public class WeatherJob {
 			}
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 	}
+
 }
