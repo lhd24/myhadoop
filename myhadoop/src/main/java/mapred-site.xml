@@ -5,4 +5,8 @@
     <name>mapreduce.framework.name</name>
     <value>yarn</value>
   </property>
+  <property>
+    <name>mapreduce.app-submission.cross-platform</name>
+    <value>true</value>
+  </property>
 </configuration>

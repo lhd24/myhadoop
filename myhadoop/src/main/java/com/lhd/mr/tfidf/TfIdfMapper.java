@@ -1,15 +1,16 @@
 package com.lhd.mr.tfidf;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
@@ -22,6 +23,7 @@ public class TfIdfMapper extends Mapper<Text, Text, Text, Text> {
 	public static Map<String, Integer> df = null;
 
 	// 在map方法执行之前
+	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
 		System.out.println("******************");
 		if (cmap == null || cmap.size() == 0 || df == null || df.size() == 0) {
@@ -45,7 +47,10 @@ public class TfIdfMapper extends Mapper<Text, Text, Text, Text> {
 					} else if (uri.getPath().endsWith("part-r-00000")) {	// 词条的DF
 						df = new HashMap<String, Integer>();
 						Path path = new Path(uri.getPath());
-						BufferedReader br = new BufferedReader(new FileReader(path.getName()));
+						//有乱码问题
+						InputStreamReader isr = new InputStreamReader(new FileInputStream(path.getName()), "UTF-8");  
+						BufferedReader br = new BufferedReader(isr);
+						//BufferedReader br = new BufferedReader(new FileReader(path.getName()));
 						String line;
 						while ((line = br.readLine()) != null) {
 							String[] ls = line.split("\t");
@@ -58,17 +63,16 @@ public class TfIdfMapper extends Mapper<Text, Text, Text, Text> {
 		}
 	}
 
+	@Override
 	protected void map(Text key, Text value, Context context) 
 			throws IOException, InterruptedException {
 		FileSplit fs = (FileSplit) context.getInputSplit();
 		if (!fs.getPath().getName().contains("part-r-00003")) {
-
 			int tf = Integer.parseInt(value.toString().trim());// tf值
 			String[] ss = key.toString().split("_");
 			if (ss.length > 1) {
 				String w = ss[1];
 				String id = ss[0];
-
 				double s = tf * Math.log(cmap.get("count") / df.get(w));
 				NumberFormat nf = NumberFormat.getInstance();
 				nf.setMaximumFractionDigits(5);
